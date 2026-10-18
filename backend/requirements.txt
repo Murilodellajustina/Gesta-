@@ -1,0 +1,11 @@
+python -m venv venv
+
+.\venv\Scripts\Activate
+pip install fastapi uvicorn
+uvicorn app.main:app --reload
+
+pip install fastapi uvicorn sqlalchemy
+pip install fastapi uvicorn psycopg
+pip install psycopg[binary]
+pip install pydantic[email]
+pip install passlib[bcrypt]
