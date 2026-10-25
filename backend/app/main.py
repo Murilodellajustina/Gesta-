@@ -7,11 +7,12 @@ from sqlalchemy.orm import Session
 from app.models.db_model import Usuario
 from app.schemas.schemas import UsuarioCadastro
 from app.services.security import gerar_hash
-from app.schemas.schemas import UsuarioLogin
-from app.services.security import verificar_senha
+from app.schemas.schemas import UsuarioLogin, UsuarioResponse
+from app.services.security import verificar_senha, get_current_user, criar_token_acesso
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 import os
+from uuid import UUID
 
 Base.metadata.create_all(bind=engine)
 
@@ -83,10 +84,11 @@ def login(
     if not verificar_senha(dados.senha, usuario.senha_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou senha incorretos")
     
+    access_token = criar_token_acesso(data={"sub": usuario.email})
 
     return {
         "mensagem": "Login realizado com sucesso!",
-        "access_token": str(usuario.id), 
+        "access_token": access_token, 
         "usuario": {
             "id": str(usuario.id),
             "nome": usuario.nome
@@ -103,3 +105,25 @@ def usuario_autenticado(authorization: str = Header(None)):
          raise HTTPException(status_code=401, detail="Token de acesso inválido")
          
     return {"sub": usuario_id}
+
+@app.get("/usuarios/{usuario_id}", response_model=UsuarioResponse)
+def buscar_usuario(
+    usuario_id: UUID, 
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    if str(current_user.id) != str(usuario_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não tem permissão para acessar os dados deste usuário."
+        )
+
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuário não encontrado."
+        )
+        
+    return usuario

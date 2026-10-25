@@ -1,8 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { login } from "../Services/Api.js";
+import { User, Lock, Eye, Heart } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,81 +15,97 @@ export default function Login() {
     setErro("");
 
     try {
-      const usuario = await login(
-        email,
-        senha
-      );
-
-      navigate("/telaInicial");
-
+      await login(email, senha);
+      navigate("/home");
     } catch (err) {
-      setErro(err.message);
-      if (senha.length < 6) setErro("A senha deve ter 6 digitos!!");
+      setErro(err.message || "Credenciais inválidas.");
+      if (senha.length < 6) setErro("A senha deve ter 6 dígitos!");
       console.error(err);
     }
   }
 
   return (
+    <div className="d-flex flex-column align-items-center h-100 w-100 bg-white overflow-auto">
+      <div className="w-100 px-4 py-5 d-flex flex-column flex-grow-1" style={{ maxWidth: '480px' }}>
+        
+        <div className="mt-2 mb-5 text-center text-md-start">
+          <h1 className="fw-bold mb-2" style={{ color: '#4c1d95' }}>Bem-vinda!</h1>
+          <p className="text-muted">Faça o seu login para continuar no GestUp.</p>
+        </div>
 
-
-    <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center p-0"
-      style={{
-        backgroundColor: '#11998e',
-        backgroundImage: 'linear-gradient(to right, #f5a6f8, #ffffff, #f5a6f8)',
-        overflowX: 'hidden'
-      }}
-    >
-      <div
-        className="card shadow p-4"
-        style={{ marginTop: "20px", width: "100%", maxWidth: "400px" }}
-      >
-        <h2 className="text-center mb-4">Login</h2>
-
-        {erro && (
-          <div className="container mt-5">
-            <div className="alert alert-danger" role="alert">
+        <form onSubmit={handleLogin} className="d-flex flex-column flex-grow-1">
+          
+          {erro && (
+            <div className="alert alert-danger rounded-4 py-2 text-center shadow-sm" style={{ fontSize: '0.875rem' }} role="alert">
               {erro}
             </div>
-          </div>
-        )}
-
-
-        <form>
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-
-            <input
-              type="email"
-              className="form-control"
-              placeholder="nome@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          )}
 
           <div className="mb-3">
-            <label className="form-label">Senha</label>
+            <div className="position-relative mb-3">
+              <User className="position-absolute top-50 translate-middle-y ms-3" size={20} style={{ color: '#a78bfa' }} />
+              <input 
+                type="text" 
+                placeholder="E-mail" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="form-control py-3 ps-5 border-light shadow-sm"
+                style={{ borderRadius: '20px', backgroundColor: '#f8fafc' }}
+                required
+              />
+            </div>
 
-            <input
-              type="password"
-              className="form-control"
-              placeholder="********"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
+            <div className="position-relative">
+              <Lock className="position-absolute top-50 translate-middle-y ms-3" size={20} style={{ color: '#a78bfa' }} />
+              <input 
+                type="password" 
+                placeholder="Senha" 
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="form-control py-3 ps-5 pe-5 border-light shadow-sm"
+                style={{ borderRadius: '20px', backgroundColor: '#f8fafc' }}
+                required
+              />
+              <button type="button" className="btn position-absolute top-50 end-0 translate-middle-y border-0 text-muted">
+                <Eye size={20} />
+              </button>
+            </div>
           </div>
 
-          <div className="d-grid">
-            <button className="btn btn-primary" type="button" onClick={handleLogin}>
-              Entrar
+          <div className="d-flex justify-content-start mb-5">
+            <button type="button" className="btn btn-link text-decoration-none p-0 fw-medium" style={{ color: '#7c3aed', fontSize: '0.875rem' }}>
+              Esqueceu sua senha?
             </button>
           </div>
-          <div className="text-center mt-3">
-            <p>
-              Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>
-            </p>
+
+          <button 
+            type="submit" 
+            className="btn w-100 py-3 fw-bold shadow-sm mb-4 text-white"
+            style={{ backgroundColor: '#8b5cf6', borderRadius: '50px' }}
+          >
+            Entrar
+          </button>
+
+          <div className="d-flex align-items-center mb-4">
+            <hr className="flex-grow-1 text-muted opacity-25" />
+            <span className="mx-3 text-muted small fw-medium">ou</span>
+            <hr className="flex-grow-1 text-muted opacity-25" />
           </div>
+
+          <button 
+            type="button" 
+            onClick={() => navigate('/cadastro')}
+            className="btn w-100 py-3 fw-bold bg-white shadow-sm"
+            style={{ border: '2px solid #ede9fe', color: '#6b7280', borderRadius: '50px' }}
+          >
+            Criar conta
+          </button>
         </form>
+
+        <div className="mt-5 pb-3 d-flex justify-content-center align-items-center" style={{ color: '#c4b5fd' }}>
+          <Heart size={24} fill="currentColor" />
+          <span className="ms-2 fw-bold" style={{ color: '#8b5cf6' }}>GestUp</span>
+        </div>
       </div>
     </div>
   );

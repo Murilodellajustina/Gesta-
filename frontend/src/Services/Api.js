@@ -55,3 +55,26 @@ export async function cadastrarUsuario(nome, telefone, IdadeGestacional, email, 
 
     return response.json();
 }
+
+export async function buscarPerfilUsuario() {
+    const token = localStorage.getItem("token");
+    const usuarioId = localStorage.getItem("usuario_id");
+
+    if (!token || !usuarioId) {
+        throw new Error("Usuário não autenticado");
+    }
+
+    const response = await fetch(`http://localhost:8000/usuarios/${usuarioId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        }
+    });
+
+    if (response.ok) {
+        return await response.json();
+    } else {
+        throw new Error("Erro ao buscar dados do usuário");
+    }
+}
